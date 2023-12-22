@@ -1,9 +1,8 @@
-import React from 'react';
 import css from './Button.module.css';
-export const Button = ({ isVisible = true, onClick }) => {
-  return isVisible ? (
-    <button className={css.Button} type="button" onClick={onClick}>
+export const Button = ({ onLoadMoreClick }) => {
+  return (
+    <button className={css.button} type="button" onClick={onLoadMoreClick}>
       Load more
     </button>
-  ) : null;
+  );
 };
