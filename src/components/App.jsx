@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import { fetchImages } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import css from './App.module.css';
@@ -9,35 +9,14 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 
-const KEY = '40538294-532b9d41dacfc837c400cb4b1';
-const pageLimit = 12;
-axios.defaults.baseURL = 'https://pixabay.com/api/';
-
-export const fetchImages = async (query, page) => {
-  const { data } = await axios({
-    params: {
-      key: KEY,
-      q: query,
-      image_type: 'photo',
-      orientation: 'horizontal',
-      safesearch: true,
-      per_page: pageLimit,
-      page: page,
-    },
-  });
-  return data;
-};
-
 export class App extends Component {
   state = {
     query: '',
     page: 1,
     images: [],
     loading: false,
-    showModal: false,
     showLoader: false,
-    largeImageURL: null,
-    tags: '',
+    modalData: null,
     error: null,
     theEndOfImages: false,
   };
@@ -71,12 +50,15 @@ export class App extends Component {
     }
   }
 
-  closeModal = () => {
-    this.setState({ showModal: false });
-  };
-
   openModal = (largeImageURL, tags) => {
-    this.setState({ showModal: true, largeImageURL, tags });
+    this.setState({
+      modalData: { largeImageURL, tags },
+    });
+  };
+  closeModal = () => {
+    this.setState({
+      modalData: null,
+    });
   };
 
   hadleSearchFormSubmit = query => {
@@ -87,15 +69,18 @@ export class App extends Component {
   };
 
   render() {
-    const { images, largeImageURL, showModal, theEndOfImages, showLoader } =
-      this.state;
+    const { images, theEndOfImages, showLoader, modalData } = this.state;
     const showLoadMoreBtn = images.length > 0 && !theEndOfImages;
     return (
       <div className={css.app}>
         <Searchbar onSubmitForm={this.hadleSearchFormSubmit} />
         <ImageGallery images={images} onModalClick={this.openModal} />
-        {showModal && (
-          <Modal largeImageURL={largeImageURL} onCloseModal={this.closeModal} />
+        {modalData && (
+          <Modal
+            largeImageURL={modalData.largeImageURL}
+            onCloseModal={this.closeModal}
+            tags={modalData.tags}
+          />
         )}
         {showLoadMoreBtn && <Button onLoadMoreClick={this.loadMoreClick} />}
         {showLoader && <Loader />}
